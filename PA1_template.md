@@ -1,27 +1,37 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: "Prady Misra"
-date: "Saturday, February 14, 2015"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Prady Misra  
+Saturday, February 14, 2015  
 
 
 ## Loading and preprocessing the data
 
 The dataset is already available in the GitHub repository so there is no need to download. Unzipping the folder will give us the CSV file we need. The resulting file has the same name activity.csv as in the zipped folder. We also verify that a sub directory named **figure** exists in current working directory and create it if it does not.
 
-```{r}
+
+```r
 unzip ("activity.zip")
 
 # All plots will be stored in "figure" directory, make sure it exists else create
 if (!file.exists("figure")) 
     dir.create("figure")
 library(plyr)
+```
+
+```
+## Warning: package 'plyr' was built under R version 3.1.2
+```
+
+```r
 f <- read.csv("activity.csv", stringsAsFactors=FALSE)
 # Do some poking around to reconfirm what is already stated in assignment
 str(f)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : chr  "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 Here is what we find:
@@ -34,7 +44,8 @@ Here is what we find:
 
 To calculate the total number of steps taken per day, we add up the steps for every day while ignoring the non-existent values (NA).
 
-```{r}
+
+```r
 # Ignore the NA values in the dataset, use built-in R features na.rm
 i <- 1
 totaldf <- data.frame()
@@ -53,16 +64,29 @@ hist(totaldf$totals, col="Red", main="Distribution of Total Steps Taken Everyday
 dev.off()
 ```
 
-```{r, echo=FALSE}
-hist(totaldf$totals, col="Red", main="Distribution of Total Steps Taken Everyday", 
-                     xlab="Total Steps Per Day", ylab="Frequency", breaks=15,
-                     xlim=c(0,25000), ylim=c(0,20))
+```
+## pdf 
+##   2
 ```
 
+![](./PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
 #### Mean and Median of total number of steps taken everyday over 61 days
-```{r}
+
+```r
 paste("Mean of the total number of steps is", mean(totaldf$totals))
+```
+
+```
+## [1] "Mean of the total number of steps is 9354.22950819672"
+```
+
+```r
 paste("Median of the total number of steps is", median(totaldf$totals))
+```
+
+```
+## [1] "Median of the total number of steps is 10395"
 ```
 
 
@@ -70,7 +94,8 @@ paste("Median of the total number of steps is", median(totaldf$totals))
 
 Calculate average number of steps taken, averaged across all days for each interval. Order the data frame by intervals then compute mean for subset containing one interval at a time for all intervals. Note that there are 61 rows for each interval and there are 288 intervals per day. Put results into a new data frame.
 
-```{r}
+
+```r
 f2 <- arrange(f, interval)
 i <- 1
 df2 <- data.frame()
@@ -89,20 +114,51 @@ with (df2, plot(interval, avgsteps, type = "l",
 dev.off()
 ```
 
-```{r, echo=FALSE}
-with (df2, plot(interval, avgsteps, type = "l",
-      main="Avg Number of Steps Taken for Each interval \n (averaged across all days)", 
-      xlab="Intervals", ylab="Avg Num of Steps", xlim=c(0,2500)))
 ```
+## pdf 
+##   2
+```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 #### The interval containing maximum number of steps
 
 We can filter() the row which has the highest value of avgsteps to get the answer. Note that this number is corroborated by the plot too.
 
-```{r}
+
+```r
 library(dplyr, quietly=TRUE)
+```
+
+```
+## Warning: package 'dplyr' was built under R version 3.1.2
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:plyr':
+## 
+##     arrange, count, desc, failwith, id, mutate, rename, summarise,
+##     summarize
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 paste("The interval containing maximum number of steps is", 
        (filter(df2, avgsteps==max(avgsteps)))$interval)
+```
+
+```
+## [1] "The interval containing maximum number of steps is 835"
 ```
 
 
@@ -116,12 +172,18 @@ Here is a brief step by step process:
    * Make a hostogram of total # steps taken, calculate mean and median of totals
 
 #### Total number of missing values in the original dataset
-```{r}
+
+```r
 paste("Total number of missing values in the original dataset is", sum(is.na(f$steps)))
 ```
 
+```
+## [1] "Total number of missing values in the original dataset is 2304"
+```
+
 #### Replacing NAs with mean for each interval
-```{r}
+
+```r
 f3 <- f2
 i <- 1
 for (k in 1:61)     # outer loop
@@ -136,7 +198,8 @@ for (k in 1:61)     # outer loop
 ```
 
 #### Make a histogram of new totals
-```{r}
+
+```r
 f4 <- f3
 f4$date <- as.POSIXct(f4$date)
 f5 <- arrange(f4, date, interval)
@@ -158,16 +221,29 @@ hist(newtotaldf$totals, col="red",
 dev.off()
 ```
 
-```{r, echo=FALSE}
-hist(newtotaldf$totals, col="red", 
-    main="Distribution of Total Steps Taken Everyday \n (New Dataset with NAs filled in)", 
-    xlab="Total Steps Per Day", ylab="Frequency", breaks=15, ylim=c(0,20))
 ```
+## pdf 
+##   2
+```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
   
 #### Mean and Median of total number of steps taken everyday for the updated dataset
-```{r}
+
+```r
 paste("Mean of the total number of steps is", mean(newtotaldf$totals))
+```
+
+```
+## [1] "Mean of the total number of steps is 10766.1886792453"
+```
+
+```r
 paste("Median of the total number of steps is", median(newtotaldf$totals))
+```
+
+```
+## [1] "Median of the total number of steps is 10766.1886792453"
 ```
 
 
@@ -177,7 +253,8 @@ Here is how we approach this:
    * Create a factor variable in dataset with 2 values - weekday and weekend
    * Make plots for avg steps taken across all intervals on weekdays and weekends
 
-```{r}
+
+```r
 # Define a function that given a date returns if it is a weekday (M-F) or Weekend (S, SA)
 dayname <- function (date) 
     {
@@ -187,7 +264,8 @@ dayname <- function (date)
 
 For each date in the date column of updated dataset determine if it is a Weekday (M-F) or a Weekend (Sat or Sun). Add a column (factor variable) indicating it.
 
-```{r}
+
+```r
 f6 <- f5
 wdf <- data.frame()
 i <- 1
@@ -200,21 +278,22 @@ while (i <= nrow(f6))
 colnames(wdf) <- c("days")
 fnew <- cbind(f6, wdf)
 rm(wdf)
-
 ```
 
 We subset the dataframe for only weekdays, find total number of rows and use that to determine number of rows for an interval over which we need to calculate the average. We know that each day has 288 of 5 minute intervals. So the number of rows for each interval will be total_rows/288 i.e. nrow(fwkday)/288. Same process is followed for weekend subset.
 
 Create two separate dataframes for weekdays and weekends (for simplicity)
 
-```{r}
+
+```r
 fwkday <- subset(fnew, select=c(steps, interval, days), subset=(days == "Weekday"))
 fwknd <- subset(fnew, select=c(steps, interval, days), subset=(days == "Weekend"))
 ```
 
 Let's handle the subset with weekdays first.
 
-```{r}
+
+```r
 fwkday <- arrange(fwkday, interval)
 i <- 1
 df2n <- data.frame()
@@ -230,7 +309,8 @@ colnames(df2n) <- c("interval", "avgsteps")
 
 Do the same for Weekends
 
-```{r}
+
+```r
 fwknd <- arrange(fwknd, interval)
 i <- 1
 df3n <- data.frame()
@@ -246,7 +326,8 @@ colnames(df3n) <- c("interval", "avgsteps")
 
 We want to create a panel plot with both of these one below the other as indicated in the instructioins and also the sample plot included with the assignment.
 
-```{r}
+
+```r
 # Set the par variable to indicate we want 2 rows and 1 column for our plots
 png(file="figure/fig4.png")
 par(mfrow=c(2,1))
@@ -258,19 +339,17 @@ with (df3n, plot(interval, avgsteps, type = "l", xlim=c(0,2500),
                  main="Steps Taken for Each Interval \n (averaged across Weekends)", 
                  col.main = "blue", xlab="Intervals", ylab="Avg Num of Steps"))
 dev.off()
+```
+
+```
+## pdf 
+##   2
+```
+
+```r
 # restore default setting
 par(mfrow=c(1,1))
 ```
 
-```{r, echo=FALSE}
-par(mfrow=c(2,1))
-with (df2n, plot(interval, avgsteps, type = "l", xlim=c(0,2500),
-                 main="Steps Taken for Each Interval \n (averaged across Weekdays)", 
-                 col.main = "red", xlab="Intervals", ylab="Avg Num of Steps"))
-
-with (df3n, plot(interval, avgsteps, type = "l", xlim=c(0,2500),
-                 main="Steps Taken for Each Interval \n (averaged across Weekends)", 
-                 col.main = "blue", xlab="Intervals", ylab="Avg Num of Steps"))
-par(mfrow=c(1,1))
-```
+![](./PA1_template_files/figure-html/unnamed-chunk-19-1.png) 
 
