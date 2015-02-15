@@ -1,6 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 Prady Misra  
-Saturday, February 14, 2015  
+Sunday, February 15, 2015  
 
 
 ## Loading and preprocessing the data
@@ -282,62 +282,23 @@ rm(wdf)
 
 We subset the dataframe for only weekdays, find total number of rows and use that to determine number of rows for an interval over which we need to calculate the average. We know that each day has 288 of 5 minute intervals. So the number of rows for each interval will be total_rows/288 i.e. nrow(fwkday)/288. Same process is followed for weekend subset.
 
-Create two separate dataframes for weekdays and weekends (for simplicity)
-
 
 ```r
-fwkday <- subset(fnew, select=c(steps, interval, days), subset=(days == "Weekday"))
-fwknd <- subset(fnew, select=c(steps, interval, days), subset=(days == "Weekend"))
+fnew1 <- ddply(fnew, c("interval", "days"), summarise, avgsteps = mean(steps))
+library(ggplot2)
 ```
 
-Let's handle the subset with weekdays first.
-
-
-```r
-fwkday <- arrange(fwkday, interval)
-i <- 1
-df2n <- data.frame()
-while (i < nrow(fwkday)) {
-  last <- i+44
-  avgsteps <- mean(fwkday[i:last,]$steps, na.rm=TRUE)
-  temp <- data.frame(fwkday$interval[i], avgsteps)
-  df2n <- rbind(df2n, temp) 
-  i <- last+1
-}
-colnames(df2n) <- c("interval", "avgsteps")
+```
+## Warning: package 'ggplot2' was built under R version 3.1.2
 ```
 
-Do the same for Weekends
-
-
 ```r
-fwknd <- arrange(fwknd, interval)
-i <- 1
-df3n <- data.frame()
-while (i < nrow(fwknd)) {
-  last <- i+44
-  avgsteps <- mean(fwknd[i:last,]$steps, na.rm=TRUE)
-  temp <- data.frame(fwknd$interval[i], avgsteps)
-  df3n <- rbind(df3n, temp) 
-  i <- last+1
-}
-colnames(df3n) <- c("interval", "avgsteps")
-```
-
-We want to create a panel plot with both of these one below the other as indicated in the instructioins and also the sample plot included with the assignment.
-
-
-```r
-# Set the par variable to indicate we want 2 rows and 1 column for our plots
 png(file="figure/fig4.png")
-par(mfrow=c(2,1))
-with (df2n, plot(interval, avgsteps, type = "l", xlim=c(0,2500),
-                 main="Steps Taken for Each Interval \n (averaged across Weekdays)", 
-                 col.main = "red", xlab="Intervals", ylab="Avg Num of Steps"))
-
-with (df3n, plot(interval, avgsteps, type = "l", xlim=c(0,2500),
-                 main="Steps Taken for Each Interval \n (averaged across Weekends)", 
-                 col.main = "blue", xlab="Intervals", ylab="Avg Num of Steps"))
+g <- ggplot(fnew1, aes(interval, avgsteps, ))
+g <- g + geom_line(aes(color=days)) + facet_grid (. ~days)
+g <- g + labs (title = "Steps Taken for Each Interval\n(averaged across weekdays & Weekends)")
+g <- g + labs ( x = "Intervals", y = "Avg Num of Steps")
+print(g)
 dev.off()
 ```
 
@@ -346,10 +307,6 @@ dev.off()
 ##   2
 ```
 
-```r
-# restore default setting
-par(mfrow=c(1,1))
-```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-19-1.png) 
+![](./PA1_template_files/figure-html/unnamed-chunk-16-1.png) 
 
